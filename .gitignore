@@ -1,0 +1,7 @@
+# node_modules 무시
+node_modules/
+client/node_modules/
+server/node_modules/
+
+# 환경 변수
+.env
