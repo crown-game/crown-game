@@ -122,11 +122,11 @@ $ npm start
 
 ## 깃 사용법
 
-### github 레포지터리 클론
+### github 레포지터리 클론 (원격저장소 내용을 로컬로 복제하는 잡업)
 
 ```bash
 
-$ git clone https://github.com/your-repo-url.git
+$ git clone https://github.com/crown-game/crown-game.git
 
 ```
 
