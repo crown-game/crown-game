@@ -5,8 +5,8 @@ function RoomJoinTest() {
   const [roomId, setRoomId] = useState(100);
   const [userId, setUserId] = useState(1);
   const [logs, setLogs] = useState([]);
-  const updateRoomUI = (roomId, waitingPlayer, totalPlayer, status) => {
-    log(`❇️ 방 상태 업데이트: ${roomId} → ${waitingPlayer}/${totalPlayer}, 시작 여부: ${status}`);
+  const updateRoomUI = (roomId, waitingPlayer, totalPlayer, isActive) => {
+    log(`❇️ 방 상태 업데이트: ${roomId} → ${waitingPlayer}/${totalPlayer}, 시작 여부: ${isActive}`);
     };
 
   useEffect(() => {
@@ -18,9 +18,9 @@ function RoomJoinTest() {
       log(`👤 다른 유저 입장: ${userId}`);
     });
 
-    // 입장시, 방 status 변경
-    socket.on("room_state_update", ({ roomId, waitingPlayer, totalPlayer, status }) => {
-        updateRoomUI(roomId, waitingPlayer, totalPlayer, status); // ✅ 여기서 UI 반영
+    // 입장시, 방 isActive 변경
+    socket.on("room_state_update", ({ roomId, waitingPlayer, totalPlayer, isActive }) => {
+        updateRoomUI(roomId, waitingPlayer, totalPlayer, isActive); // ✅ 여기서 UI 반영
     });
 
     return () => {

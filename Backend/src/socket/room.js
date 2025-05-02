@@ -14,7 +14,6 @@ module.exports = (io, socket) => {
 
         // 방장 gameRoomUser 테이블에 넣는 로직 있어야 함!
         const waitingPlayer = 1; // 일단 임시값
-        const totalPlayer = 2; // 일단 임시값
 
         // ✅ 방 생성 직후 모든 사용자에게 실시간 알림
         io.emit("room_state_update", {

@@ -6,6 +6,9 @@ function RoomCreateTest() {
   const [roomId, setRoomId] = useState(100); // 수동 입력
   const [totalPlayer, setTotalPlayer] = useState(2);
   const [logs, setLogs] = useState([]); // 👉 로그를 저장할 상태 (배열) => UI 보여주기용
+  const updateRoomUI = (roomId, waitingPlayer, totalPlayer, isActive) => {
+    log(`❇️ 방 상태 업데이트: ${roomId} → ${waitingPlayer}/${totalPlayer}, 시작 여부: ${isActive}`);
+    };
 
   useEffect(() => {
     socket.on("room_created", ({ roomId, masterId, totalPlayer }) => {
@@ -13,8 +16,14 @@ function RoomCreateTest() {
       setRoomId(roomId);
     });
 
+    // 방 생성 후 방 isActive 변경
+    socket.on("room_state_update", ({ roomId, waitingPlayer, totalPlayer, isActive }) => {
+        updateRoomUI(roomId, waitingPlayer, totalPlayer, isActive); // ✅ 여기서 UI 반영
+    });
+
     return () => {
       socket.off("room_created");
+      socket.off("room_state_update");
     };
   }, []);
 
