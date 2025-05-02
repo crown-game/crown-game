@@ -140,6 +140,7 @@ $ git clone https://github.com/crown-game/crown-game.git
 
 $ git branch
 
+$ git branch -a    # 숨겨진 모든 브랜치 확인
 
 
 # develop 브랜치 최신화
