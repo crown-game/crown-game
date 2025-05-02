@@ -20,7 +20,7 @@ module.exports = (io, socket) => {
             roomId,
             waitingPlayer,        // 방장은 바로 들어온 상태
             totalPlayer,
-            isActive: false            // 아직 게임 시작 안됨
+            isActive         // 게임 시작 여부
         });
         
     });
@@ -34,10 +34,12 @@ module.exports = (io, socket) => {
     // 1. DB에 userId, roomId 저장 (gameRoomUser 테이블)
 
     // 2. 현재 인원 수 조회 (방에 몇 명 있는지)
-    const waitingPlayer = 2;    // 예시임
+    const waitingPlayer = 5;    // 예시임
 
     // 3. 전체 인원 수 조회 (gameRoom 테이블에서 가져오기)
     const totalPlayer = 5;  // 예시임
+
+    const isActive = waitingPlayer === totalPlayer; // ✅ 참가 인원 다 찼으면 게임 시작
 
     // 해당 네임스페이스에 실시간 전송
     // 로비에서 대기 중인 사용자에게 필요한 정보니까.
@@ -45,7 +47,7 @@ module.exports = (io, socket) => {
         roomId,
         waitingPlayer,
         totalPlayer,
-        isActive: false,  // 시작이 true
+        isActive  // 시작이 true
     });
 
     // 입장 알림 기능 괜찮은데?
@@ -54,6 +56,12 @@ module.exports = (io, socket) => {
 
     // 같은 방에 있는 다른 사람들에게 입장 알림
     socket.to(roomId).emit("user_joined", { userId });
+
+    // 게임방 내부 참가자에게 게임 시작 알림!
+    if(isActive){
+        io.to(roomId).emit("game_started", {roomId});
+        console.log(`🎮${roomId}번 게임방 게임 시작!!`);
+    }
   });
 
 };

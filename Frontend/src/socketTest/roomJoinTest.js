@@ -23,10 +23,16 @@ function RoomJoinTest() {
         updateRoomUI(roomId, waitingPlayer, totalPlayer, isActive); // ✅ 여기서 UI 반영
     });
 
+    // 방에 참여자 다 차면 게임 시작
+    socket.on("game_started", ({roomId}) =>{
+        log(`🎮 ${roomId}번 방 게임 시작했습니다!!`);
+    });
+
     return () => {
       socket.off("joined_room");
       socket.off("user_joined");
       socket.off("room_state_update");
+      socket.off("game_started");
     };
   }, []);
 
