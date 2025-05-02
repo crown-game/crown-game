@@ -1,27 +1,27 @@
 // index.js 서버 실행 진입점
 const express = require("express");
 const http = require("http");
-const socketIo = require("socket.io");
+const { Server } = require('socket.io');
 const cors = require("cors");
 
 const app = express();
-app.use(cors({
-  origin: "http://localhost:3000",
-  methods: ["GET", "POST"],
-  credentials: true
-})); // CORS 미들웨어 적용
-
+app.use(cors());  // cors 허용 
 const server = http.createServer(app);
 
-const { Server } = require("socket.io"); 
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:3000",
-    methods: ["GET", "POST"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
   }
 });
 
+// 확인용
+app.get('/', (req, res) => {
+  res.send('<h1>서버 생성 완료</h1>');
+});
+
+const roomHandler = require("./src/socket/room")
 
 io.on("connection", (socket) => { // 클라이언트가 연결되었을 때
   console.log(`🟢 연결됨: ${socket.id}`); // 연결된 클라이언트의 socket.id 출력
@@ -36,6 +36,11 @@ io.on("connection", (socket) => { // 클라이언트가 연결되었을 때
   socket.on("disconnect", () => {
     console.log(`🔴 연결 끊김: ${socket.id}`); // 클라이언트 연결이 끊겼을 때 출력
   });
+
+  // 게임방 생성
+  roomHandler(io, socket);
+
+  socket.emit("news", "Hello Socket.io");
 });
 
 // 서버 실행
