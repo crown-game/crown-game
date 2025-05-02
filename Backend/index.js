@@ -8,6 +8,10 @@ const app = express();
 app.use(cors());  // cors 허용 
 const server = http.createServer(app);
 
+// 소켓 통신 테스트
+const roomHandler = require("./src/socket/room")
+
+// 소켓 서버 생성
 const io = new Server(server, {
   cors: {
     origin: "http://localhost:3000",
@@ -21,8 +25,7 @@ app.get('/', (req, res) => {
   res.send('<h1>서버 생성 완료</h1>');
 });
 
-const roomHandler = require("./src/socket/room")
-
+// 소켓 연결
 io.on("connection", (socket) => { // 클라이언트가 연결되었을 때
   console.log(`🟢 연결됨: ${socket.id}`); // 연결된 클라이언트의 socket.id 출력
 
@@ -37,7 +40,7 @@ io.on("connection", (socket) => { // 클라이언트가 연결되었을 때
     console.log(`🔴 연결 끊김: ${socket.id}`); // 클라이언트 연결이 끊겼을 때 출력
   });
 
-  // 게임방 생성
+  // 게임방 생성 및 참가가
   roomHandler(io, socket);
 
   socket.emit("news", "Hello Socket.io");
