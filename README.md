@@ -74,7 +74,7 @@
 
 ```bash
 
-$ cd /path/to/your/backend
+$ cd /path/to/your/backend/server
 
 
 
