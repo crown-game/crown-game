@@ -16,7 +16,7 @@ function RoomCreateTest() {
       setRoomId(roomId);
     });
 
-    // 방 생성 후 방 isActive 변경
+    // 방 생성 후 방 정보 변경
     socket.on("room_state_update", ({ roomId, waitingPlayer, totalPlayer, isActive }) => {
         updateRoomUI(roomId, waitingPlayer, totalPlayer, isActive); // ✅ 여기서 UI 반영
     });

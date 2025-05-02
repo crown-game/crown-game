@@ -18,7 +18,7 @@ function RoomJoinTest() {
       log(`👤 다른 유저 입장: ${userId}`);
     });
 
-    // 입장시, 방 isActive 변경
+    // 입장시, 방 정보 변경
     socket.on("room_state_update", ({ roomId, waitingPlayer, totalPlayer, isActive }) => {
         updateRoomUI(roomId, waitingPlayer, totalPlayer, isActive); // ✅ 여기서 UI 반영
     });
