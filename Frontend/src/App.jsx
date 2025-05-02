@@ -1,12 +1,14 @@
 import React, { useEffect } from "react";
-import socket from "./socket";
 
 import Chat from "./chat";
+import RoomTest from "./socketTest/roomTest";
+import RoomJoinTest from "./socketTest/roomJoinTest";
 
 function App() {
   return (
     <div className="App">
-      <Chat />
+      <RoomTest/>
+      <RoomJoinTest/>
     </div>
   );
 }

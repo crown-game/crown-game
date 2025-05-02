@@ -1,7 +1,6 @@
 {
   "name": "frontend",
   "version": "1.0.0",
-  "description": "",
   "main": "App.js",
   "scripts": {
     "start": "react-scripts start",
@@ -27,5 +26,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "description": ""
 }
