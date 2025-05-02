@@ -78,7 +78,7 @@ $ cd /path/to/your/backend/server
 
 
 
-(package.json이 없으면 $ npm init -y   # package.json 자동 생성)
+$ npm init -y   # package.json 자동 생성(update)
 
 
 
