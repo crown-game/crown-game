@@ -12,7 +12,6 @@ function RoomJoinTest({setRoomInfo}) {
 
   useEffect(() => {
     socket.on("joined_room", ({ roomId, userId }) => {
-      setRoomInfo({ roomId, userId });
       log(`✅ 본인 입장 완료: ${userId} → ${roomId}`);
     });
 
