@@ -42,8 +42,6 @@ const loginUser = async (userName, password) => {
     }
 
     const user = name[0];
-    console.log('입력된 비밀번호:', password);
-    console.log('DB에서 가져온 비밀번호:', user.password);  // 이제 user.password로 접근 가능
 
     const isCorrect = await bcrypt.compare(password, user.password);  // 소문자 password로 비교
     if (!isCorrect) {
