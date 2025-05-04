@@ -1,4 +1,5 @@
 const AuthService = require('../services/AuthServices');
+const jwt = require('jsonwebtoken');
 
 ///회원 가입 controller 구현현
 const registerUser = async (req, res) => {
@@ -21,18 +22,30 @@ const registerUser = async (req, res) => {
 
 
 // 로그인 controller 구현 
-const loginUser = async (req, res) => {
-    console.log('[로그인 요청] req.body:', req.body);
+const loginUser = async (req , res )=> {
   
     const { userName, password } = req.body;
-    if (!userName || !password) {
-      return res.status(400).json({ message: '아이디와 비밀번호를 입력해주세요.' });
-    }
-  
     try {
       const user = await AuthService.loginUser(userName, password);
+
+   
+      if (!user) {
+        return res.status(400).json({ message: '잘못된 사용자 이름 또는 비밀번호' });
+      }
+  
+      // JWT 토큰 생성하기 
+      const token = jwt.sign(
+        {
+          userId: user.userId,
+          userName: user.userName,
+        },
+        'mySecretKey',  // 하드코딩된 비밀키!!
+        { expiresIn: '1h' }
+      );
+  
       res.status(200).json({
         message: '로그인 성공',
+        token,  // -> 프론트에서 이 토큰을 저장하고 요청 시 사용
         user: {
           userId: user.userId,
           userName: user.userName,
@@ -47,5 +60,5 @@ const loginUser = async (req, res) => {
   
   module.exports = {
     registerUser,
-    loginUser
+    loginUser,
   };

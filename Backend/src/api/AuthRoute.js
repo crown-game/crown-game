@@ -5,6 +5,7 @@ const router = express.Router();
 const AuthController = require('./AuthController');
 const multer = require('multer');
 const path = require('path');
+const authToken =require('../middleware/AuthMiddleware');
 
 // Multer 저장 설정
 const storage = multer.diskStorage({
@@ -37,5 +38,14 @@ router.post('/register', upload.single('profile_Img'), AuthController.registerUs
 
 // 로그인 라우트
 router.post('/login', AuthController.loginUser);
+
+// 인증된 사용자 정보 가져오기 (jwt 토큰 사용해서!!)
+router.get('/me', authToken, (req, res)=> {
+  res.status(200).json({
+    message : '로그인된 사용자 정보',
+    user : req.user // 토큰에서 추출한 사용자 정보 
+
+  });
+});
 
 module.exports = router;
