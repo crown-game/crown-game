@@ -2,7 +2,7 @@
 const db = require("../config/db");
 
 module.exports = (io, socket) => {
-  socket.on("chat_message", async ({ roomId, userId, message }) => {
+  socket.on("chat_message", async ({ roomId, userId, userName, message }) => {
     try {
       // ✅ DB에서 금칙어 리스트 불러오기
       const [rows] = await db.query("SELECT forbid_text FROM forbidden_word");
@@ -18,7 +18,7 @@ module.exports = (io, socket) => {
       }
 
       // ✅ 정상 메시지는 그대로 전송
-      io.to(roomId).emit("chat_message", { userId, message });
+      io.to(roomId).emit("chat_message", { userId, userName, message });
 
     } catch (err) {
       console.error("❌ 금칙어 필터링 오류:", err);

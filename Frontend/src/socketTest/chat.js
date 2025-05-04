@@ -2,14 +2,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import socket from "../socket"; // socket.io-client 인스턴스
 
-function Chat({ roomId, userId }) {
+function Chat({ roomId, userId, userName }) {
   const [chatInput, setChatInput] = useState("");
   const [chatLog, setChatLog] = useState([]);
   const chatBoxRef = useRef(null);
 
   useEffect(() => {
-    socket.on("chat_message", ({ userId, message }) => {
-      setChatLog((prev) => [...prev, { userId, message }]);
+    socket.on("chat_message", ({ userId, userName, message }) => {
+      setChatLog((prev) => [...prev, { userId, userName, message }]);
     });
 
     socket.on("chat_blocked", ({ message }) => {
@@ -35,6 +35,7 @@ function Chat({ roomId, userId }) {
     socket.emit("chat_message", {
       roomId,
       userId,
+      userName,
       message: chatInput,
     });
 
@@ -56,7 +57,7 @@ function Chat({ roomId, userId }) {
       >
         {chatLog.map((msg, i) => (
           <div key={i}>
-            <strong>{msg.userId}</strong>: {msg.message}
+            <strong>{msg.userName || msg.userId}</strong>: {msg.message}
           </div>
         ))}
       </div>
