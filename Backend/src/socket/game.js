@@ -1,5 +1,7 @@
 const db = require("../config/db");
 const gameStates = new Map();   // 방별 게임 상태 저장
+const userScores = new Map();  // userId -> 누적 점수 => 임시 테스트용
+const questionTimer = new Map();  // 문제마다 제한 시간 재는 타이머
 
 // game.js
 async function startGameRounds(io, roomId, round) {
@@ -49,7 +51,8 @@ async function startGameRounds(io, roomId, round) {
         ...prevState,          // 기존 상태 유지
         round,                 // 새로운 라운드 번호 덮어쓰기
         questionIndex: 0,      // 문제 인덱스 초기화
-        questions              // 새 문제 리스트
+        questions,              // 새 문제 리스트
+        correctUsers: []      // 문제마다 맞은 사람들만 넣을 배열!
     });
 
     sendNextQuestion(io, roomId);
@@ -69,6 +72,7 @@ function sendNextQuestion(io, roomId) {
     if (round >= 5) {
       io.to(roomId).emit("game_finished", {
         message: "🎉 게임이 종료되었습니다!",
+        scores: Object.fromEntries(userScores),  // userId별 점수 객체 전송
       });
       gameStates.delete(roomId);  // 상태 초기화
       console.log(`🏁 ${roomId} 게임 종료됨`);
@@ -87,6 +91,7 @@ function sendNextQuestion(io, roomId) {
   state.answerIndex = answerIndex;
   state.questionId = question.id;
   state.questionIndex++;
+  state.correctUsers = []; // 새 문제이므로 초기화
   gameStates.set(roomId, state);    // ✅ 상태 업데이트 명시적으로 저장
 
   io.to(roomId).emit("new_question", {
@@ -98,19 +103,48 @@ function sendNextQuestion(io, roomId) {
   });
 
   console.log(`🧠 ${roomId} 문제 전송: 라운드 ${round}, 문제 ${state.questionIndex}`);
+
+  // 기존 타이머가 있다면 제거
+  if (questionTimer.has(roomId)) {
+    clearTimeout(questionTimer.get(roomId));
+  }
+
+  // 새로운 타이머 설정 (예: 10초)
+  const timerId = setTimeout(() => {
+    sendNextQuestion(io, roomId);
+  }, 5000);
+
+  questionTimer.set(roomId, timerId);
 }
 
 function registerGameHandlers(io, socket) {
-  socket.on("submit_answer", ({ roomId, userId, answerIndex }) => {
+  socket.on("submit_answer", async ({ roomId, userId, answerIndex }) => {
     const state = gameStates.get(roomId);
     if (!state) return;
 
     const correct = answerIndex === state.answerIndex;
     console.log(`📥 ${userId} → ${roomId} 정답 제출: ${correct ? "⭕ 정답" : "❌ 오답"}`);
 
-    // TODO: 점수 저장 등 처리 가능
+    if (correct) {
+      // 중복 방지
+      if (!state.correctUsers.includes(userId)) {
+        state.correctUsers.push(userId); //  정답자 배열에 순서대로 추가
 
-    setTimeout(() => sendNextQuestion(io, roomId), 2000);
+        // ✅ 점수 부여: 선착순 3등까지만
+      const index = state.correctUsers.length - 1;
+      if (index < 3) {
+        const round = state.round;
+        const pointTable = round === 5 ? [50, 30, 10] : [30, 20, 10];
+        const points = pointTable[index];
+
+        const prevScore = userScores.get(userId) || 0;
+        const newScore = prevScore + points;
+        userScores.set(userId, newScore);
+
+        console.log(`🏅 ${userId}님에게 ${points}점 지급! (총점: ${newScore})`);
+        }
+      }
+    }
   });
 }
 
