@@ -8,8 +8,9 @@ const app = express();
 app.use(cors());  // cors 허용 
 const server = http.createServer(app);
 
-// 소켓 통신 테스트
-const roomHandler = require("./src/socket/room")
+// 소켓 통신 테스트 - 핸들러 연결
+const roomHandler = require("./src/socket/room");
+const gameHandler = require("./src/socket/game");
 
 // 소켓 서버 생성
 const io = new Server(server, {
@@ -42,6 +43,7 @@ io.on("connection", (socket) => { // 클라이언트가 연결되었을 때
 
   // 게임방 생성 및 참가가
   roomHandler(io, socket);
+  gameHandler.registerGameHandlers(io, socket);
 
   socket.emit("news", "Hello Socket.io");
 });

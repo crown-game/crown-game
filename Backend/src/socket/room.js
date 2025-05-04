@@ -1,3 +1,5 @@
+const {startGameRounds} = require("./game");
+
 module.exports = (io, socket) => {
     socket.on("create_room", ({ roomId, masterId, totalPlayer }) => {
         // ✅ 게임 방 만들기(emit 잘 도착했는지 확인용)
@@ -61,6 +63,16 @@ module.exports = (io, socket) => {
     if(isActive){
         io.to(roomId).emit("game_started", {roomId});
         console.log(`🎮${roomId}번 게임방 게임 시작!!`);
+
+        // ✅ 곧 1라운드 첫 문제가 시작된다는 타이머 알림 보내기!
+        io.to(roomId).emit("countdown", { seconds: 5 }); // 클라이언트가 5초 카운트다운 시작
+
+        // ✅ 5초 후 첫 문제 출제
+        setTimeout(() => {
+            console.log(`⏳ 5초 후 startGameRounds 실행!`);
+            // io.to(roomId).emit("start_game_rounds", { roomId }); // emit으로 game.js에 시작 신호 보냄
+            startGameRounds(io, roomId, 1);  // 직접 함수 실행! 1라운드부터 실행.
+        }, 5000);
     }
   });
 

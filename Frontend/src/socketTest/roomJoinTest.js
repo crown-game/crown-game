@@ -26,6 +26,8 @@ function RoomJoinTest() {
     // 방에 참여자 다 차면 게임 시작
     socket.on("game_started", ({roomId}) =>{
         log(`🎮 ${roomId}번 방 게임 시작했습니다!!`);
+        // 수신 즉시 setGameStarted(true) 같은 상태 변경
+        // 혹은 navigate('/game') 등으로 라우팅 처리
     });
 
     return () => {
