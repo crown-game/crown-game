@@ -164,6 +164,37 @@ function registerGameHandlers(io, socket) {
       }
     }
   });
+
+  // 게임 중간에 사용자 나감 + 1명만 남았을 경우 강제 종료
+  socket.on("leave_room", ({ roomId, userId }) => {
+    console.log(`🚪 ${userId}님 ${roomId}에서 나감`);
+    socket.leave(roomId);
+
+    const room = io.sockets.adapter.rooms.get(roomId);
+    const remainingPlayers = room ? room.size : 0;
+
+    // ✅ 전체 사용자에게 방 상태 브로드캐스트
+    io.emit("room_state_update", {
+      roomId,
+      waitingPlayer: remainingPlayers,
+      totalPlayer: 5,  // 예시
+      isActive: true,
+    });
+
+    // ✅ 같은 방 내부 유저들에게 퇴장 알림
+    io.to(roomId).emit("user_left", { userId });
+
+    // ✅ 1명 이하 남으면 게임 종료
+    if (remainingPlayers <= 1) {
+      io.to(roomId).emit("game_forced_end", {
+        message: "⚠️ 플레이어가 모두 나가 게임이 종료되었습니다.",
+      });
+
+      gameStates.delete(roomId);
+      questionTimer.delete(roomId);
+      console.log(`🛑 ${roomId} 게임 강제 종료됨`);
+    }
+  });
 }
 
 module.exports = {

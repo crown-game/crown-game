@@ -18,6 +18,18 @@ function GameQuizTest({roomId, userId}) {   // props로 전달받음
     console.log(msg);
   };
 
+  const handleLeaveRoom = () => {
+    if (!roomId || !userId) return;
+
+    socket.emit("leave_room", { roomId, userId });
+    log(`🚪 나가기 요청 전송: ${roomId}, ${userId}`);
+
+    // 클라이언트 화면 전환 (예: 로비로 이동)
+    // 만약 navigate 사용 중이라면:
+    // navigate("/lobby");
+  };
+
+
   useEffect(() => {
     if (!roomId || !userId) return;
 
@@ -38,6 +50,11 @@ function GameQuizTest({roomId, userId}) {   // props로 전달받음
     // 라운드 시작 알림
     socket.on("round_started", ({ round }) => {
       log(`🔄 ${round}라운드 시작!`);
+    });
+
+    socket.on("game_forced_end", ({ message }) => {
+      alert(message);
+      // navigate("/lobby");
     });
 
     socket.on("game_finished", (data) => {
@@ -124,6 +141,20 @@ function GameQuizTest({roomId, userId}) {   // props로 전달받음
         </div>
         
       )}
+
+      <button
+        onClick={handleLeaveRoom}
+        style={{
+          marginTop: "1rem",
+          backgroundColor: "#f8d7da",
+          border: "1px solid #f5c2c7",
+          padding: "0.5rem",
+          color: "#842029",
+        }}
+      >
+        🚪 게임 나가기
+      </button>
+
 
       <div style={{ marginTop: "1rem", borderTop: "1px solid gray", paddingTop: "1rem" }}>
         <h4>📋 로그:</h4>
