@@ -12,8 +12,13 @@ function Chat({ roomId, userId }) {
       setChatLog((prev) => [...prev, { userId, message }]);
     });
 
+    socket.on("chat_blocked", ({ message }) => {
+      alert(message);  // 또는 로그/상단 경고 표시
+    });
+
     return () => {
       socket.off("chat_message");
+      socket.off("chat_blocked");
     };
   }, []);
 
