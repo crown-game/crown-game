@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from "react";
 import socket from "../socket";
 
-function RoomJoinTest() {
-  const [roomId, setRoomId] = useState(100);
-  const [userId, setUserId] = useState(1);
+function RoomJoinTest({setRoomInfo}) {
+  const [roomId, setRoomId] = useState();
+  const [userId, setUserId] = useState();
   const [logs, setLogs] = useState([]);
+
   const updateRoomUI = (roomId, waitingPlayer, totalPlayer, isActive) => {
     log(`❇️ 방 상태 업데이트: ${roomId} → ${waitingPlayer}/${totalPlayer}, 시작 여부: ${isActive}`);
     };
 
   useEffect(() => {
     socket.on("joined_room", ({ roomId, userId }) => {
+      setRoomInfo({ roomId, userId });
       log(`✅ 본인 입장 완료: ${userId} → ${roomId}`);
     });
 
@@ -42,6 +44,7 @@ function RoomJoinTest() {
 
   const handleJoinRoom = () => {
     socket.emit("join_room", { roomId, userId });
+    setRoomInfo({roomId, userId});
     log(`📨 join_room emit 보냄: roomId=${roomId}, userId=${userId}`);
   };
 

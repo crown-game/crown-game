@@ -1,23 +1,25 @@
 import React, { useEffect, useState } from "react";
 import socket from "../socket"; // socket.io-client 인스턴스 경로 확인!
 
-function GameQuizTest() {
+function GameQuizTest({roomId, userId}) {   // props로 전달받음
   const [logs, setLogs] = useState([]);
   const [question, setQuestion] = useState(null);
   const [countdown, setCountdown] = useState(null);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
 
-  // 👉 테스트용 roomId/userId
-  const roomId = 100;
-  const userId = 1;
+//   // 👉 테스트용 roomId/userId
+//   const roomId = 100;
+//   const userId = 1;
 
-  // 로그 찍기용 헬퍼 함수
+  // 로그 찍기용
   const log = (msg) => {
     setLogs((prev) => [...prev, msg]);
     console.log(msg);
   };
 
   useEffect(() => {
+    if (!roomId || !userId) return;
+
     // 게임 시작 타이머
     socket.on("countdown", ({ seconds }) => {
       log(`⏱ 게임이 ${seconds}초 후에 시작됩니다!`);
@@ -46,8 +48,9 @@ function GameQuizTest() {
       socket.off("countdown");
       socket.off("new_question");
       socket.off("round_started");
+      socket.off("game_finished");
     };
-  }, []);
+  }, [roomId, userId]);
 
   // 🔁 countdown 값을 보고 1초마다 줄이기
     useEffect(() => {
@@ -71,12 +74,12 @@ function GameQuizTest() {
 
     setSelectedAnswer(index);
     socket.emit("submit_answer", {
-      roomId,
-      userId,
-      answerIndex: index,
+        roomId,
+        userId,
+        answerIndex: index,
     });
 
-    log(`📤 정답 제출: ${index + 1}번 선택`);
+    log(`📤 게임방: ${roomId} / 유저명:${userId} / 정답 제출: ${index + 1}번 선택`);
   };
 
  return (

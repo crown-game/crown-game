@@ -15,8 +15,8 @@ module.exports = (io, socket) => {
         console.log(`📨 네임스페이스 안에 ${roomId}이라는 이름의 룸 생성 완료!`);
 
         // 방장 gameRoomUser 테이블에 넣는 로직 있어야 함!
-        const waitingPlayer = 1; // 일단 임시값
-
+        const waitingPlayer = 1; 
+        const isActive = false;
         // ✅ 방 생성 직후 모든 사용자에게 실시간 알림
         io.emit("room_state_update", {
             roomId,
