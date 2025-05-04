@@ -57,8 +57,21 @@ const loginUser = async (req , res )=> {
       res.status(400).json({ message: err.message });
     }
   };
+
+  /////////////////////////
+  //로그아웃 구현 !!!
+  const logoutUser = async (req, res) => {
+    try{
+      // 클라이언트에서 토큰을 제거하면 로그아웃 처리됨 
+      res.status(200).json({message : '로그아웃 성공'});
+
+    }catch (err) {
+      res.status(500).json({message : '로그아웃 실패', error : err.message});
+    }
+  };
   
   module.exports = {
     registerUser,
     loginUser,
+    logoutUser
   };

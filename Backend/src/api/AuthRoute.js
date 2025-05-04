@@ -48,4 +48,8 @@ router.get('/me', authToken, (req, res)=> {
   });
 });
 
+////////////////////////////////////////
+// 로그아웃 라우트 
+router.post('/logout',AuthController.logoutUser);
+
 module.exports = router;
