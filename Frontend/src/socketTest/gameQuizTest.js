@@ -6,6 +6,7 @@ function GameQuizTest({roomId, userId}) {   // props로 전달받음
   const [question, setQuestion] = useState(null);
   const [countdown, setCountdown] = useState(null);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [rankingList, setRankingList] = useState([]);
 
 //   // 👉 테스트용 roomId/userId
 //   const roomId = 100;
@@ -43,6 +44,11 @@ function GameQuizTest({roomId, userId}) {   // props로 전달받음
         alert(data.message); // "🎉 게임이 종료되었습니다!" 등
         // 게임 결과 화면 전환 등 후속 처리
     });
+
+    socket.on("update_ranking", (rankingList)=>{
+      log("👑 랭킹 업데이트 수신!");
+      setRankingList(rankingList);
+    })
 
     return () => {
       socket.off("countdown");
@@ -116,13 +122,29 @@ function GameQuizTest({roomId, userId}) {   // props로 전달받음
             ))}
           </ul>
         </div>
+        
       )}
 
       <div style={{ marginTop: "1rem", borderTop: "1px solid gray", paddingTop: "1rem" }}>
         <h4>📋 로그:</h4>
         {logs.map((line, i) => <div key={i}>{line}</div>)}
       </div>
+
+      {rankingList.length > 0 && (
+        <div style={{ marginTop: "1rem", borderTop: "1px solid gray", paddingTop: "1rem" }}>
+          <h4>🏆 현재 랭킹 (왕관 수 기준):</h4>
+          <ol>
+            {rankingList.map((user, index) => (
+              <li key={user.username}>
+                {index === 0 ? "👑 " : ""}
+                {user.username} - {user.crown_cnt}개
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
     </div>
+    
   );
 }
 

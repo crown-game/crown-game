@@ -70,11 +70,29 @@ function sendNextQuestion(io, roomId) {
 
     // 5라운드 끝났으면 종료 처리
     if (round >= 5) {
+      // db에서 우승자 가져오기!
+
+      // 우승자 왕관 하나 추가
+
       io.to(roomId).emit("game_finished", {
         message: "🎉 게임이 종료되었습니다!",
         scores: Object.fromEntries(userScores),  // userId별 점수 객체 전송
       });
+
+      // 전체 랭킹 다시 불러와서 로비로 broadcast
+      const rankingRows = [
+        { username: "Alice", crown_cnt: 5 },
+        { username: "Bob", crown_cnt: 4 },
+        { username: "Charlie", crown_cnt: 3 },
+        { username: "Diana", crown_cnt: 2 },
+        { username: "Eve", crown_cnt: 1 },
+      ];
+
+      io.emit("update_ranking", rankingRows);
+      console.log("👑 랭킹 전송 완료:", rankingRows);
+
       gameStates.delete(roomId);  // 상태 초기화
+      questionTimer.delete(roomId);
       console.log(`🏁 ${roomId} 게임 종료됨`);
       return;
     }
