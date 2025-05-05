@@ -19,9 +19,14 @@ const getUserScore = async (roomId, userId) => {
     return await usersModel.getUserScore(roomId, userId);
 };
 
+const getRanking = async() => {
+    return await usersModel.getUserRanking();
+};
+
 module.exports = {
     getWinners,
     addCrownToWinners,
     addScoreToUser,
     getUserScore,
+    getRanking,
 };

@@ -25,14 +25,16 @@ const addCrownToWinners = async (userId) => {
     `, [userId]);
 };
 
-// const getUsersRanking = async () => {
-//     const [rows] = await db.query(
-//         `
-//         SELECT 
-//         `
-//     );
-//     return rows;
-// };
+const getUserRanking = async () => {
+    const [rows] = await db.query(
+        `
+        SELECT USERNAME, CROWN_CNT
+        FROM USERS
+        ORDER BY CROWN_CNT DESC
+        `
+    );
+    return rows;
+};
 
 const addScoreToUser = async (roomId, userId, points) => {
     await db.query(
@@ -57,6 +59,7 @@ const getUserScore = async (roomId, userId) => {
 module.exports = {
     getWinnersByRoomId,
     addCrownToWinners,
+    getUserRanking,
     addScoreToUser,
     getUserScore,
 };

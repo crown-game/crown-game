@@ -49,13 +49,7 @@ async function sendNextQuestion(io, roomId) {
 
       // 전체 랭킹 다시 불러와서 로비로 broadcast
       // 이 부분 DB 연결 필요!
-      const rankingRows = [
-        { username: "Alice", crown_cnt: 5 },
-        { username: "Bob", crown_cnt: 4 },
-        { username: "Charlie", crown_cnt: 3 },
-        { username: "Diana", crown_cnt: 2 },
-        { username: "Eve", crown_cnt: 1 },
-      ];
+      const rankingRows = await gameScoreService.getRanking();
 
       io.emit("update_ranking", rankingRows);
       console.log("👑 랭킹 전송 완료:", rankingRows);

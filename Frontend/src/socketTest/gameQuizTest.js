@@ -218,7 +218,7 @@ function GameQuizTest({roomId, userId}) {   // props로 전달받음
             {rankingList.map((user, index) => (
               <li key={user.username}>
                 {index === 0 ? "👑 " : ""}
-                {user.username} - {user.crown_cnt}개
+                {user.USERNAME} - {user.CROWN_CNT}개
               </li>
             ))}
           </ol>
