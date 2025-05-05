@@ -30,6 +30,7 @@ const getUserRanking = async () => {
         `
         SELECT USERNAME, CROWN_CNT
         FROM USERS
+        WHERE CROWN_CNT > 0
         ORDER BY CROWN_CNT DESC
         `
     );
