@@ -4,8 +4,10 @@ const express = require("express");
 const http = require("http");
 const { Server } = require('socket.io');
 const cors = require("cors");
+const jwt = require("jsonwebtoken");
 // 라우터 등록
 const authRoutes = require("./src/api/AuthRoute");
+const rankingRoutes = require("./src/api/RankingRoute");
 
 const app = express();
 app.use(cors());  // cors 허용
@@ -16,6 +18,7 @@ app.use(express.urlencoded({ extended: true })); // form 요청 파싱
 app.use('/uploads',express.static(path.join(__dirname, './src/uploads')));
 // 라우터 연결
 app.use("/auth", authRoutes);
+app.use("/ranking", rankingRoutes);
 
 const server = http.createServer(app);
 
