@@ -1,30 +1,23 @@
 const {startGameRounds} = require("./game");
+const gameRoomService = require("../services/gameRoomService");
 
 module.exports = (io, socket) => {
-    socket.on("create_room", ({ roomId, masterId, totalPlayer }) => {
-        // ✅ 게임 방 만들기(emit 잘 도착했는지 확인용)
-        console.log(`📥 create_room 수신: roomId=${roomId}, masterId=${masterId}, totalPlayer=${totalPlayer}`);
+    socket.on("create_room", async ({ masterId, totalPlayer }) => {
+        try{
+            // 방 만들기 -> 방장 등록 + roomInfo 리턴까지 다 포함됨
+            const roomInfo = await gameRoomService.createGameRoom(masterId, totalPlayer);
 
-        socket.join(roomId);    // Socket.IO에서 현재 연결된 클라이언트를 특정 "룸(room)"에 추가하는 명령
+            // 방장 소켓 룸 참가
+            socket.join(roomInfo.roomId);
 
-        socket.emit("room_created", {
-            roomId,
-            masterId,
-            totalPlayer,
-        });
-        console.log(`📨 네임스페이스 안에 ${roomId}이라는 이름의 룸 생성 완료!`);
-
-        // 방장 gameRoomUser 테이블에 넣는 로직 있어야 함!
-        const waitingPlayer = 1; 
-        const isActive = false;
-        // ✅ 방 생성 직후 모든 사용자에게 실시간 알림
-        io.emit("room_state_update", {
-            roomId,
-            waitingPlayer,        // 방장은 바로 들어온 상태
-            totalPlayer,
-            isActive         // 게임 시작 여부
-        });
-        
+            socket.emit("room_created", roomInfo);
+            console.log(`📨 네임스페이스 안에 ${roomInfo.roomId}이라는 이름의 룸 생성 완료!`);
+            
+            // 전체 사용자에게 상태 업데이트 알림
+            io.emit("room_state_update", roomInfo);
+        }catch(err){
+            console.error("[에러] 방 생성 실패:", err);
+        }
     });
 
     // ✅ 플레이어가 게임방에 입장 (
