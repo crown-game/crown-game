@@ -2,48 +2,13 @@ const db = require("../config/db");
 const gameStates = new Map();   // 방별 게임 상태 저장
 const userScores = new Map();  // userId -> 누적 점수 => 임시 테스트용
 const questionTimer = new Map();  // 문제마다 제한 시간 재는 타이머
+const quizService = require("../services/quizService");
 
 // game.js
 async function startGameRounds(io, roomId, round) {
   console.log(`🎮 ${roomId}번 방 ${round}라운드 시작!`);
 
-  // ✅ 1라운드 문제 5개 불러오기 (섞지 않고 고정 순서로)
-  // 문항 선택은 5문제 5개 => 25개
-  const [rows] = await db.query(`
-    SELECT *
-    FROM QUIZ
-    JOIN QUIZ_OPTION USING (QID)
-    WHERE ROUND = ?
-    ORDER BY QID
-    LIMIT 25
-  `, [round]);
-
-  // 문제 묶기 (qid 기준으로)
-  const questionsMap = new Map();
-  for (const row of rows) {
-    // questionsMap에 해당 QID가 아직 없는 경우
-    // 이 조건문은 새로운 질문(QID)을 처음 만났을 때 해당 질문의 기본 구조를 questionsMap에 추가하는 역할
-    if (!questionsMap.has(row.QID)) {
-        // questionsMap에 새로운 키-값 쌍을 추가
-        questionsMap.set(row.QID, {
-            id: row.QID,
-            text: row.QUESTION,
-            options: [],
-        });
-    }
-    questionsMap.get(row.QID).options.push({
-      option_text: row.CHOICE,
-      is_correct: row.IS_CORRECT,
-    });
-    }
-
-    const questions = Array.from(questionsMap.values());
-
-    // gameStates.set(roomId, {
-    //     round,
-    //     questionIndex: 0,   // questionIndex는 현재 라운드에서 몇 번째 문제를 내보냈는지를 의미하는 문제 진행 인덱스
-    //     questions   
-    // });
+  const questions = await quizService.buildQuestions(round);
 
     // ✅ 기존 상태 유지하며 round, questionIndex, questions만 갱신
     const prevState = gameStates.get(roomId) || {};
