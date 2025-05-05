@@ -3,6 +3,8 @@ const userScores = new Map();  // userId -> 누적 점수 => 임시 테스트용
 const questionTimer = new Map();  // 문제마다 제한 시간 재는 타이머
 const quizService = require("../services/quizService");
 const gameScoreService = require("../services/gameScoreService");
+const gameRoomService = require("../services/gameRoomService");
+const gameRoomUserService = require("../services/gameRoomUserService");
 
 // game.js
 async function startGameRounds(io, roomId, round) {
@@ -46,6 +48,7 @@ async function sendNextQuestion(io, roomId) {
       });
 
       // 전체 랭킹 다시 불러와서 로비로 broadcast
+      // 이 부분 DB 연결 필요!
       const rankingRows = [
         { username: "Alice", crown_cnt: 5 },
         { username: "Bob", crown_cnt: 4 },
@@ -64,7 +67,7 @@ async function sendNextQuestion(io, roomId) {
     }
 
     io.to(roomId).emit("round_started", { round: nextRound });
-    setTimeout(() => startGameRounds(io, roomId, nextRound), 2000);
+    setTimeout(() => startGameRounds(io, roomId, nextRound), 2000); // NEXT ROUND 시작 전 2초 기다림
     return;
   }
 
@@ -76,7 +79,7 @@ async function sendNextQuestion(io, roomId) {
   state.questionId = question.id;
   state.questionIndex++;
   state.correctUsers = []; // 새 문제이므로 초기화
-  gameStates.set(roomId, state);    // ✅ 상태 업데이트 명시적으로 저장
+  gameStates.set(roomId, state);    // 상태 업데이트 명시적으로 저장
 
   io.to(roomId).emit("new_question", {
     round,
@@ -86,7 +89,7 @@ async function sendNextQuestion(io, roomId) {
     options: shuffled.map((opt) => opt.option_text),
   });
 
-  console.log(`🧠 ${roomId} 문제 전송: 라운드 ${round}, 문제 ${state.questionIndex}`);
+  console.log(`🕹️ ${roomId} 문제 전송: 라운드 ${round}, 문제 ${state.questionIndex}`);
 
   // 기존 타이머가 있다면 제거
   if (questionTimer.has(roomId)) {
@@ -132,26 +135,32 @@ function registerGameHandlers(io, socket) {
   });
 
   // 게임 중간에 사용자 나감 + 1명만 남았을 경우 강제 종료
-  socket.on("leave_room", ({ roomId, userId }) => {
+  socket.on("leave_room", async ({ roomId, userId }) => {
     console.log(`🚪 ${userId}님 ${roomId}에서 나감`);
     socket.leave(roomId);
 
-    const room = io.sockets.adapter.rooms.get(roomId);
-    const remainingPlayers = room ? room.size : 0;
+    // DB에서 해당 유저 삭제
+    await gameRoomUserService.leaveRoom(roomId, userId);
+
+    // 최신 게임 방 정보 가져오기
+    const roomInfo = await gameRoomService.getRoomInfo(roomId);
+    const waitingPlayers = roomInfo.WAITING_PLAYER;
+    const totalPlayers = roomInfo.TOTAL_PLAYER;
+    const isActive = roomInfo.IS_ACTIVE;
 
     // ✅ 전체 사용자에게 방 상태 브로드캐스트
     io.emit("room_state_update", {
       roomId,
-      waitingPlayer: remainingPlayers,
-      totalPlayer: 5,  // 예시
-      isActive: true,
+      waitingPlayer: waitingPlayers,
+      totalPlayer: totalPlayers,
+      isActive: isActive,
     });
 
     // ✅ 같은 방 내부 유저들에게 퇴장 알림
     io.to(roomId).emit("user_left", { userId });
 
     // ✅ 1명 이하 남으면 게임 종료
-    if (remainingPlayers <= 1) {
+    if (waitingPlayers <= 1) {
       io.to(roomId).emit("game_forced_end", {
         message: "⚠️ 플레이어가 모두 나가 게임이 종료되었습니다.",
       });

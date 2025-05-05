@@ -25,6 +25,14 @@ const addCrownToWinners = async (userId) => {
     `, [userId]);
 };
 
+// const getUsersRanking = async () => {
+//     const [rows] = await db.query(
+//         `
+//         SELECT 
+//         `
+//     );
+//     return rows;
+// };
 
 module.exports = {
     getWinnersByRoomId,
