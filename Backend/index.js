@@ -1,46 +1,25 @@
-// index.js
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 const bodyParser = require('body-parser');
-const GameRoomService = require('./src/services/GameRoomService');
+const gameRoomRoutes = require('../Backend/routes/gameRoomRoutes'); // 라우터 파일
 
 const app = express();
-const port = 3000;
+const server = http.createServer(app); // Socket.IO를 위해 http 서버 생성
+const io = new Server(server, {
+    cors: {
+        origin: '*', // 프론트 도메인에 맞게 설정
+        methods: ['GET', 'POST']
+    }
+});
+
+// 소켓 저장해서 다른 파일에서도 사용할 수 있도록 등록
+app.set('io', io);
 
 app.use(bodyParser.json());
+app.use(gameRoomRoutes); // 라우터 등록
 
-const gameRoomService = new GameRoomService();
-
-// 게임방 생성 
-app.post('/game-room', (req, res) => {
-    const { masterId, roomConfig } = req.body;
-
-    if (!masterId || !roomConfig || !roomConfig.maxPlayers) {
-        return res.status(400).json({ error: 'masterId and maxPlayers are required' });
-    }
-
-    const result = gameRoomService.createGameRoom(masterId, roomConfig);
-    res.status(201).json(result); // 생성된 게임방 정보 응답
-});
-
-//게임방 입장
-app.post('/game-room/:roomId/join', (req, res) => {
-    const roomId = parseInt(req.params.roomId);
-    const { userId } = req.body;
-
-    if (!userId) {
-        return res.status(400).json({ error: 'userId is required' });
-    }
-
-    try {
-        const result = gameRoomService.joinGameRoom(roomId, userId);
-        res.json(result);
-    } catch (error) {
-        res.status(404).json({ error: error.message });
-    }
-});
-
-
-// 서버 실행
-app.listen(port, () => {
+const port = 3000;
+server.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
 });
