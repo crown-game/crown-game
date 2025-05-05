@@ -1,8 +1,8 @@
-const db = require("../config/db");
 const gameStates = new Map();   // 방별 게임 상태 저장
 const userScores = new Map();  // userId -> 누적 점수 => 임시 테스트용
 const questionTimer = new Map();  // 문제마다 제한 시간 재는 타이머
 const quizService = require("../services/quizService");
+const gameScoreService = require("../services/gameScoreService");
 
 // game.js
 async function startGameRounds(io, roomId, round) {
@@ -23,12 +23,11 @@ async function startGameRounds(io, roomId, round) {
     sendNextQuestion(io, roomId);
 }
 
-function sendNextQuestion(io, roomId) {
+async function sendNextQuestion(io, roomId) {
   const state = gameStates.get(roomId);
   if (!state) return;
 
   const { round, questionIndex, questions } = state;
-//   const currentRoundQuestions = questions;
 
   if (questionIndex >= questions.length) {
     const nextRound = round + 1;
@@ -36,8 +35,10 @@ function sendNextQuestion(io, roomId) {
     // 5라운드 끝났으면 종료 처리
     if (round >= 5) {
       // db에서 우승자 가져오기!
+      const winners = await gameScoreService.getWinners(roomId);
 
       // 우승자 왕관 하나 추가
+      await gameScoreService.addCrownToWinners(winners);
 
       io.to(roomId).emit("game_finished", {
         message: "🎉 게임이 종료되었습니다!",
