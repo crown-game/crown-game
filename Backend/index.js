@@ -1,11 +1,22 @@
 // index.js 서버 실행 진입점
+const path = require("path");
 const express = require("express");
 const http = require("http");
 const { Server } = require('socket.io');
 const cors = require("cors");
+// 라우터 등록
+const authRoutes = require("./src/api/AuthRoute");
 
 const app = express();
-app.use(cors());  // cors 허용 
+app.use(cors());  // cors 허용
+app.use(express.json()); // JSON 요청 파싱
+app.use(express.urlencoded({ extended: true })); // form 요청 파싱
+
+//이미지 접근 경로 등록하기
+app.use('/uploads',express.static(path.join(__dirname, './src/uploads')));
+// 라우터 연결
+app.use("/auth", authRoutes);
+
 const server = http.createServer(app);
 
 // 소켓 통신 테스트 - 핸들러 연결
@@ -20,6 +31,22 @@ const io = new Server(server, {
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: false
   }
+});
+
+// ✅ 소켓 JWT 인증 미들웨어 (2단계)
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) {
+    return next(new Error("토큰 없음"));
+  }
+
+  jwt.verify(token, "mySecretKey", (err, decoded) => {
+    if (err) {
+      return next(new Error("토큰 유효하지 않음"));
+    }
+    socket.user = decoded;  // 👈 소켓에 유저 정보 주입
+    next();
+  });
 });
 
 // 확인용
