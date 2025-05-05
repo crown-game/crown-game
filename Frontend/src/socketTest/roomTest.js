@@ -33,22 +33,19 @@ function RoomCreateTest() {
   };
 
   const handleCreateRoom = async () => {
-    if (!roomId || !masterId) {
-      log("❌ roomId와 masterId를 입력하세요.");
+    if (!masterId) {
+      log("❌ masterId를 입력하세요.");
       return;
     }
 
     try {
-      // 1. REST API로 방 생성 → roomId 받아오기
-      
       // 2. 소켓 emit으로 서버에 room 생성 알림
       socket.emit("create_room", {
-        roomId: Number(roomId),
         masterId: Number(masterId),
         totalPlayer: Number(totalPlayer),
       });
 
-      log(`📨 socket.emit("create_room") 호출: roomId=${roomId}, masterId=${masterId}, totalPlayer=${totalPlayer}`);
+      log(`📨 socket.emit("create_room") 호출:  masterId=${masterId}, totalPlayer=${totalPlayer}`);
     } catch (err) {
       log("❌ 에러 발생: " + err.message);
     }
@@ -60,9 +57,6 @@ return (
 
       <label>User ID: </label>
       <input value={masterId} onChange={(e) => setMasterId(e.target.value)} />
-
-      <label>Room ID: </label>
-      <input value={roomId} onChange={(e) => setRoomId(e.target.value)} />
 
       <label>Max Players: </label>
       <input

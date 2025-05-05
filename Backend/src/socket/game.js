@@ -144,12 +144,13 @@ function registerGameHandlers(io, socket) {
 
     // DB에서 해당 유저 삭제
     await gameRoomUserService.leaveRoom(roomId, userId);
+    await gameRoomService.subWaitingPlayer(roomId);
 
     // 최신 게임 방 정보 가져오기
     const roomInfo = await gameRoomService.getRoomInfo(roomId);
-    const waitingPlayers = roomInfo.WAITING_PLAYER;
-    const totalPlayers = roomInfo.TOTAL_PLAYER;
-    const isActive = roomInfo.IS_ACTIVE;
+    const waitingPlayers = roomInfo.waitingPlayer;
+    const totalPlayers = roomInfo.totalPlayer;
+    const isActive = roomInfo.isActive;
 
     // ✅ 전체 사용자에게 방 상태 브로드캐스트
     io.emit("room_state_update", {

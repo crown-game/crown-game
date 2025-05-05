@@ -37,20 +37,20 @@ const io = new Server(server, {
 });
 
 // ✅ 소켓 JWT 인증 미들웨어 (2단계)
-io.use((socket, next) => {
-  const token = socket.handshake.auth.token;
-  if (!token) {
-    return next(new Error("토큰 없음"));
-  }
+// io.use((socket, next) => {
+//   const token = socket.handshake.auth.token;
+//   if (!token) {
+//     return next(new Error("토큰 없음"));
+//   }
 
-  jwt.verify(token, "mySecretKey", (err, decoded) => {
-    if (err) {
-      return next(new Error("토큰 유효하지 않음"));
-    }
-    socket.user = decoded;  // 👈 소켓에 유저 정보 주입
-    next();
-  });
-});
+//   jwt.verify(token, "mySecretKey", (err, decoded) => {
+//     if (err) {
+//       return next(new Error("토큰 유효하지 않음"));
+//     }
+//     socket.user = decoded;  // 👈 소켓에 유저 정보 주입
+//     next();
+//   });
+// });
 
 // 확인용
 app.get('/', (req, res) => {

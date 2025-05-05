@@ -18,13 +18,23 @@ const createGameRoom = async (masterId, totalPlayer) => {
   return {
     roomId,
     masterId,
-    totalPlayer: roomInfo.TOTAL_PLAYER,
-    waitingPlayer: roomInfo.WAITING_PLAYER,
-    isActive: roomInfo.IS_ACTIVE,
+    totalPlayer: roomInfo.totalPlayer,
+    waitingPlayer: roomInfo.waitingPlayer,
+    isActive: roomInfo.isActive,
   };
+};
+
+const addWaitingPlayer = async (roomId) => {
+  await gameRoomModel.addWaitingPlayer(roomId);
+};
+
+const subWaitingPlayer = async (roomId) => {
+  await gameRoomModel.subWaitingPlayer(roomId);
 };
 
 module.exports = {
     getRoomInfo,
     createGameRoom,
+    addWaitingPlayer,
+    subWaitingPlayer,
 }
