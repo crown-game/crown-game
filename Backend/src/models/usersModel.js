@@ -34,7 +34,29 @@ const addCrownToWinners = async (userId) => {
 //     return rows;
 // };
 
+const addScoreToUser = async (roomId, userId, points) => {
+    await db.query(
+        `
+        UPDATE GAME_ROOM_USER
+        SET GAME_SCORE = GAME_SCORE + ?
+        WHERE GID = ? AND UID = ?;
+        `, [points, roomId, userId]);
+};
+
+const getUserScore = async (roomId, userId) => {
+    const [rows] = await db.query(
+        `
+        SELECT GAME_SCORE
+        FROM GAME_ROOM_USER
+        WHERE GID = ? AND UID = ?
+        `
+    , [roomId, userId]);
+    return rows[0]?.GAME_SCORE || 0;
+};
+
 module.exports = {
     getWinnersByRoomId,
     addCrownToWinners,
+    addScoreToUser,
+    getUserScore,
 };

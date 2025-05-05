@@ -7,10 +7,7 @@ function GameQuizTest({roomId, userId}) {   // props로 전달받음
   const [countdown, setCountdown] = useState(null);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [rankingList, setRankingList] = useState([]);
-
-//   // 👉 테스트용 roomId/userId
-//   const roomId = 100;
-//   const userId = 1;
+  const [scores, setScores] = useState({});
 
   // 로그 찍기용
   const log = (msg) => {
@@ -52,6 +49,13 @@ function GameQuizTest({roomId, userId}) {   // props로 전달받음
       log(`🔄 ${round}라운드 시작!`);
     });
 
+    socket.on("score_updated", ({userId, score})=>{
+      setScores(prev => ({
+        ...prev,
+        [userId]: score,
+      }));
+    });
+
     socket.on("game_forced_end", ({ message }) => {
       alert(message);
       // navigate("/lobby");
@@ -71,7 +75,10 @@ function GameQuizTest({roomId, userId}) {   // props로 전달받음
       socket.off("countdown");
       socket.off("new_question");
       socket.off("round_started");
+      socket.off("score_updated");
+      socket.off("game_forced_end");
       socket.off("game_finished");
+      socket.off("update_ranking");
     };
   }, [roomId, userId]);
 
@@ -154,6 +161,19 @@ function GameQuizTest({roomId, userId}) {   // props로 전달받음
       >
         🚪 게임 나가기
       </button>
+
+      {Object.keys(scores).length > 0 && (
+        <div style={{ marginTop: "1rem", borderTop: "1px solid gray", paddingTop: "1rem" }}>
+          <h4>📊 실시간 점수판:</h4>
+          <ul>
+            {Object.entries(scores).map(([uid, score]) => (
+              <li key={uid}>
+                {uid === userId ? "나" : uid}: {score}점
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
 
       <div style={{ marginTop: "1rem", borderTop: "1px solid gray", paddingTop: "1rem" }}>

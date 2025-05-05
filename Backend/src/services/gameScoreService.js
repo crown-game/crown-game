@@ -11,7 +11,17 @@ const addCrownToWinners = async(winners) => {
     }
 };
 
+const addScoreToUser = async (roomId, userId, points) => {
+    await usersModel.addScoreToUser(roomId, userId, points);
+};
+
+const getUserScore = async (roomId, userId) => {
+    return await usersModel.getUserScore(roomId, userId);
+};
+
 module.exports = {
     getWinners,
     addCrownToWinners,
+    addScoreToUser,
+    getUserScore,
 };

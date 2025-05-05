@@ -1,5 +1,4 @@
 const gameStates = new Map();   // 방별 게임 상태 저장
-const userScores = new Map();  // userId -> 누적 점수 => 임시 테스트용
 const questionTimer = new Map();  // 문제마다 제한 시간 재는 타이머
 const quizService = require("../services/quizService");
 const gameScoreService = require("../services/gameScoreService");
@@ -44,7 +43,7 @@ async function sendNextQuestion(io, roomId) {
 
       io.to(roomId).emit("game_finished", {
         message: "🎉 게임이 종료되었습니다!",
-        scores: Object.fromEntries(userScores),  // userId별 점수 객체 전송
+        // scores: Object.fromEntries(userScores),  // userId별 점수 객체 전송
       });
 
       // 전체 랭킹 다시 불러와서 로비로 broadcast
@@ -124,11 +123,20 @@ function registerGameHandlers(io, socket) {
         const pointTable = round === 5 ? [50, 30, 10] : [30, 20, 10];
         const points = pointTable[index];
 
-        const prevScore = userScores.get(userId) || 0;
-        const newScore = prevScore + points;
-        userScores.set(userId, newScore);
+        await gameScoreService.addScoreToUser(roomId, userId, points);
+        const newScore = await gameScoreService.getUserScore(roomId, userId);
+
+        // const prevScore = userScores.get(userId) || 0;
+        // const newScore = prevScore + points;
+        // userScores.set(userId, newScore);
 
         console.log(`🏅 ${userId}님에게 ${points}점 지급! (총점: ${newScore})`);
+
+        // 클라이언트에게 실시간 점수 전송
+        io.to(roomId).emit("score_updated", {
+          userId,
+          score: newScore,
+        });
         }
       }
     }
