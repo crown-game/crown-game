@@ -1,5 +1,6 @@
 const gameStates = new Map();   // 방별 게임 상태 저장
 const questionTimer = new Map();  // 문제마다 제한 시간 재는 타이머
+const TIME_LIMIT = 5;  // 플젝에서 정한 시간은 20초
 const quizService = require("../services/quizService");
 const gameScoreService = require("../services/gameScoreService");
 const gameRoomService = require("../services/gameRoomService");
@@ -90,15 +91,15 @@ async function sendNextQuestion(io, roomId) {
 
   console.log(`🕹️ ${roomId} 문제 전송: 라운드 ${round}, 문제 ${state.questionIndex}`);
 
-  // 기존 타이머가 있다면 제거
+  // 이전 타이머 제거
   if (questionTimer.has(roomId)) {
     clearTimeout(questionTimer.get(roomId));
   }
 
-  // 새로운 타이머 설정 (예: 10초)
+  // 다음 문제 타이머 설정
   const timerId = setTimeout(() => {
     sendNextQuestion(io, roomId);
-  }, 5000);
+  }, TIME_LIMIT*1000);
 
   questionTimer.set(roomId, timerId);
 }

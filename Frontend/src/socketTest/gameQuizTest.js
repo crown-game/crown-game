@@ -4,10 +4,12 @@ import socket from "../socket"; // socket.io-client 인스턴스 경로 확인!
 function GameQuizTest({roomId, userId}) {   // props로 전달받음
   const [logs, setLogs] = useState([]);
   const [question, setQuestion] = useState(null);
+  const [timeLeft, setTimeLeft] = useState(null);
   const [countdown, setCountdown] = useState(null);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [rankingList, setRankingList] = useState([]);
   const [scores, setScores] = useState({});
+  const TIME_LIMIT = 5; // 플젝에선 20초
 
   // 로그 찍기용
   const log = (msg) => {
@@ -42,6 +44,12 @@ function GameQuizTest({roomId, userId}) {   // props로 전달받음
       setQuestion(q);
       setSelectedAnswer(null);
       setCountdown(null); // 타이머 종료
+      setTimeLeft(TIME_LIMIT);
+    });
+
+    // 문제 타이머
+    socket.on("question_timer", ({remainingTime}) => {
+      setTimeLeft(remainingTime);
     });
 
     // 라운드 시작 알림
@@ -98,6 +106,23 @@ function GameQuizTest({roomId, userId}) {   // props로 전달받음
 
     return () => clearInterval(timer); // cleanup
     }, [countdown]);
+    
+    // 🔁 문제 타이머 값을 1초마다 줄이기
+    useEffect(() => {
+      if (timeLeft === null || timeLeft <= 0) return;
+
+      const timer = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev === 1) {
+            clearInterval(timer);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+
+      return () => clearInterval(timer); // 컴포넌트 리렌더링 시 타이머 제거
+    }, [timeLeft]);
 
     const handleAnswer = (index) => {
     if (selectedAnswer !== null) return;
@@ -147,6 +172,11 @@ function GameQuizTest({roomId, userId}) {   // props로 전달받음
           </ul>
         </div>
         
+      )}
+      {timeLeft !== null && (
+        <div style={{ fontSize: "1.5rem", marginTop: "1rem" }}>
+          ⏳ 남은 시간: {timeLeft}초
+        </div>
       )}
 
       <button
