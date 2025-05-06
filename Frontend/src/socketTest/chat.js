@@ -1,8 +1,12 @@
 // Chat.js
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useContext } from "react";
 import socket from "../socket"; // socket.io-client 인스턴스
+import { AuthContext } from "../context/AuthContext";
 
-function Chat({ roomId, userId, userName }) {
+function Chat({ roomId }) {
+  const { user } = useContext(AuthContext);
+  const userId = user.userId;
+  const userName = user.userName;
   const [chatInput, setChatInput] = useState("");
   const [chatLog, setChatLog] = useState([]);
   const chatBoxRef = useRef(null);

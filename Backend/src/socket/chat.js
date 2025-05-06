@@ -1,7 +1,9 @@
 const chatService = require("../services/chatService");
 
 module.exports = (io, socket) => {
-  socket.on("chat_message", async ({ roomId, userId, userName, message }) => {
+  socket.on("chat_message", async ({ roomId, message }) => {
+    const userId = socket.user.userId;
+    const userName = socket.user.userName;
     try {
       // DB에서 금지어 리스트 불러오기
       const containsForbidden = await chatService.checkForbidden(message);
