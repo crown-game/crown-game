@@ -5,5 +5,3 @@ server/node_modules/
 
 # 환경 변수
 .env
-
-Backend/src/config/db.js
