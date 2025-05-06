@@ -3,7 +3,8 @@ const gameRoomService = require("../services/gameRoomService");
 const gameRoomUserService = require("../services/gameRoomUserService");
 
 module.exports = (io, socket) => {
-    socket.on("create_room", async ({ masterId, totalPlayer }) => {
+    socket.on("create_room", async ({ totalPlayer }) => {
+        const masterId = socket.user.userId;
         try{
             // 방 만들기 -> 방장 등록 + roomInfo 리턴까지 다 포함됨
             const roomInfo = await gameRoomService.createGameRoom(masterId, totalPlayer);

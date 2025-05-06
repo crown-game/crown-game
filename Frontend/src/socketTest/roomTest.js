@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import socket from "../socket"; // socket.io-client instance
+import { AuthContext } from "../context/AuthContext";
 
 function RoomCreateTest() {
-  const [masterId, setMasterId] = useState(1);
-  const [roomId, setRoomId] = useState(100); // 수동 입력
+  const {user} = useContext(AuthContext);
   const [totalPlayer, setTotalPlayer] = useState(2);
   const [logs, setLogs] = useState([]); // 👉 로그를 저장할 상태 (배열) => UI 보여주기용
   const updateRoomUI = (roomId, waitingPlayer, totalPlayer, isActive) => {
@@ -33,15 +33,14 @@ function RoomCreateTest() {
   };
 
   const handleCreateRoom = async () => {
-    if (!masterId) {
-      log("❌ masterId를 입력하세요.");
+    if (!user) {
+      log("❌ 로그인된 사용자만 방을 만들 수 있습니다.");
       return;
     }
 
     try {
       // 2. 소켓 emit으로 서버에 room 생성 알림
       socket.emit("create_room", {
-        masterId: Number(masterId),
         totalPlayer: Number(totalPlayer),
       });
 
@@ -54,9 +53,6 @@ function RoomCreateTest() {
 return (
     <div>
       <h2>🎮 방 만들기 (소켓 테스트)</h2>
-
-      <label>User ID: </label>
-      <input value={masterId} onChange={(e) => setMasterId(e.target.value)} />
 
       <label>Max Players: </label>
       <input
