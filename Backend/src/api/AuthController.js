@@ -6,7 +6,7 @@ const registerUser = async (req, res) => {
     const { userName, password } = req.body;
     const profile_Img = req.file
       ? `/uploads/profile/${req.file.filename}`
-      : `/uploads/profile/default_profile/profile.png`;
+      : `/uploads/default_profile/profile.png`;
   
     try {
       const newUser = await AuthService.registerUser(userName, password, profile_Img);
