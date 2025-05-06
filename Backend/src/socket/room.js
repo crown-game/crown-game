@@ -23,7 +23,8 @@ module.exports = (io, socket) => {
     });
 
     // ✅ 플레이어가 게임방에 입장 (
-    socket.on("join_room", async ({ roomId, userId }) => {
+    socket.on("join_room", async ({ roomId }) => {
+        const userId = socket.user.userId;
         try{
             console.log(`📥 join_room 수신: roomId=${roomId}, userId=${userId}`);
 

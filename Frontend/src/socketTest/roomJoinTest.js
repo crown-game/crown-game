@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import socket from "../socket";
+import {AuthContext} from "../context/AuthContext";
 
 function RoomJoinTest({setRoomInfo}) {
   const [roomId, setRoomId] = useState();
-  const [userId, setUserId] = useState();
+  const {user} = useContext(AuthContext);
   const [logs, setLogs] = useState([]);
 
   const updateRoomUI = (roomId, waitingPlayer, totalPlayer, isActive) => {
@@ -42,17 +43,16 @@ function RoomJoinTest({setRoomInfo}) {
   const log = (msg) => setLogs((prev) => [...prev, msg]);
 
   const handleJoinRoom = () => {
-    socket.emit("join_room", { roomId, userId });
-    setRoomInfo({roomId, userId});
-    log(`📨 join_room emit 보냄: roomId=${roomId}, userId=${userId}`);
+    socket.emit("join_room", { roomId});
+    setRoomInfo({roomId, userId: user.userId});
+    log(`📨 join_room emit 보냄: roomId=${roomId}, userId=${user.userId}`);
   };
 
   return (
     <div>
       <h2>🎮 게임방 참가 테스트</h2>
       <input value={roomId} onChange={(e) => setRoomId(e.target.value)} placeholder="Room ID" />
-      <input value={userId} onChange={(e) => setUserId(e.target.value)} placeholder="User ID" />
-      <button onClick={handleJoinRoom}>방 입장</button>
+      <button onClick={handleJoinRoom} disabled={!user}>방 입장</button>
 
       <div style={{ marginTop: "1rem", border: "1px solid gray", padding: "1rem", maxHeight: "200px", overflowY: "auto" }}>
         <h4>📋 로그:</h4>
