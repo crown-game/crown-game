@@ -1,7 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import socket from "../socket"; // socket.io-client 인스턴스 경로 확인!
+import {AuthContext} from "../context/AuthContext";
 
-function GameQuizTest({roomId, userId}) {   // props로 전달받음
+function GameQuizTest({roomId}) {   // props로 전달받음
+  const {user} = useContext(AuthContext);
+  const userId = user.userId;
   const [logs, setLogs] = useState([]);
   const [question, setQuestion] = useState(null);
   const [timeLeft, setTimeLeft] = useState(null);
@@ -20,8 +23,8 @@ function GameQuizTest({roomId, userId}) {   // props로 전달받음
   const handleLeaveRoom = () => {
     if (!roomId || !userId) return;
 
-    socket.emit("leave_room", { roomId, userId });
-    log(`🚪 나가기 요청 전송: ${roomId}, ${userId}`);
+    socket.emit("leave_room", { roomId });
+    log(`🚪 나가기 요청 전송: ${roomId}`);
 
     // 클라이언트 화면 전환 (예: 로비로 이동)
     // 만약 navigate 사용 중이라면:
@@ -130,7 +133,6 @@ function GameQuizTest({roomId, userId}) {   // props로 전달받음
     setSelectedAnswer(index);
     socket.emit("submit_answer", {
         roomId,
-        userId,
         answerIndex: index,
     });
 

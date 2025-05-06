@@ -99,7 +99,8 @@ async function sendNextQuestion(io, roomId) {
 }
 
 function registerGameHandlers(io, socket) {
-  socket.on("submit_answer", async ({ roomId, userId, answerIndex }) => {
+  socket.on("submit_answer", async ({ roomId, answerIndex }) => {
+    const userId = socket.user.userId;
     const state = gameStates.get(roomId);
     if (!state) return;
 
@@ -138,7 +139,8 @@ function registerGameHandlers(io, socket) {
   });
 
   // 게임 중간에 사용자 나감 + 1명만 남았을 경우 강제 종료
-  socket.on("leave_room", async ({ roomId, userId }) => {
+  socket.on("leave_room", async ({ roomId }) => {
+    const userId = socket.user.userId;
     console.log(`🚪 ${userId}님 ${roomId}에서 나감`);
     socket.leave(roomId);
 
