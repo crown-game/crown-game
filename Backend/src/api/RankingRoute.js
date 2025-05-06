@@ -6,7 +6,7 @@ const db = require("../config/db");
 router.get('/', async (req, res) => {
     try {
         const [rows] = await db.query(`
-            SELECT USERNAME, CROWN_CNT
+            SELECT USERNAME, CROWN_CNT, PROFILE_IMG
             FROM USERS
             ORDER BY CROWN_CNT DESC
         `);
