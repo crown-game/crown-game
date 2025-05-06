@@ -69,6 +69,17 @@ const getAllRooms = async () => {
   return rows;
 };
 
+const deleteRoom = async (roomId) => {
+    await db.query(
+        `
+        DELETE
+        FROM GAME_ROOM
+        WHERE GID=1;
+        `,
+        [roomId]
+    );
+};
+
 module.exports = {
     createRoom,
     getRoomInfo,
@@ -76,4 +87,5 @@ module.exports = {
     subWaitingPlayer,
     getAllRooms,
     setActive,
+    deleteRoom,
 }

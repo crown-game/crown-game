@@ -57,6 +57,9 @@ async function sendNextQuestion(io, roomId) {
       gameStates.delete(roomId);  // 상태 초기화
       questionTimer.delete(roomId);
       console.log(`🏁 ${roomId} 게임 종료됨`);
+
+      // 방 삭제
+      await gameRoomService.deleteRoom(roomId);
       return;
     }
 
@@ -174,6 +177,8 @@ function registerGameHandlers(io, socket) {
       gameStates.delete(roomId);
       questionTimer.delete(roomId);
       console.log(`🛑 ${roomId} 게임 강제 종료됨`);
+
+      await gameRoomService.deleteRoom(roomId);
     }
   });
 }

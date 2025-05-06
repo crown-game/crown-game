@@ -40,6 +40,10 @@ const setActive = async (roomId) => {
   await gameRoomModel.setActive(roomId);
 };
 
+const deleteRoom = async (roomId) => {
+  await gameRoomModel.deleteRoom(roomId);
+}
+
 module.exports = {
     getRoomInfo,
     createGameRoom,
@@ -47,4 +51,5 @@ module.exports = {
     subWaitingPlayer,
     getAllRooms,
     setActive,
+    deleteRoom,
 }
