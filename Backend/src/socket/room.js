@@ -35,18 +35,9 @@ module.exports = (io, socket) => {
             socket.join(roomId); // 룸 참가
 
             // 최신 방 정보 조회
-            const roomInfo = await gameRoomService.getRoomInfo(roomId);
+            let roomInfo = await gameRoomService.getRoomInfo(roomId);
 
             const isActive = roomInfo.waitingPlayer === roomInfo.totalPlayer;   // 참가 인원 다 찼으면 게임 시작
-
-            // 해당 네임스페이스에 실시간 전송
-            // 로비에서 대기 중인 사용자에게 필요한 정보니까.
-            io.emit("room_state_update", {
-                roomId,
-                waitingPlayer: roomInfo.waitingPlayer,
-                totalPlayer: roomInfo.totalPlayer,
-                isActive  // 시작이 true
-            });
 
             // 입장 알림 기능 괜찮은데?
             // 본인에게 입장 완료 알림
@@ -57,6 +48,21 @@ module.exports = (io, socket) => {
 
             // 게임방 내부 참가자에게 게임 시작 알림!
             if(isActive){
+                // Active 정보 저장
+                await gameRoomService.setActive(roomId);
+
+                // 최신 방 정보 조회
+                roomInfo = await gameRoomService.getRoomInfo(roomId);
+
+                // 해당 네임스페이스에 실시간 전송
+                // 로비에서 대기 중인 사용자에게 필요한 정보니까.
+                io.emit("room_state_update", {
+                    roomId,
+                    waitingPlayer: roomInfo.waitingPlayer,
+                    totalPlayer: roomInfo.totalPlayer,
+                    isActive: roomInfo.isActive// 시작이 true
+                });
+
                 io.to(roomId).emit("game_started", {roomId});
                 console.log(`🎮${roomId}번 게임방 게임 시작!!`);
 

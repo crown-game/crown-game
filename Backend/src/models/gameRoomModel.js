@@ -45,9 +45,35 @@ const subWaitingPlayer = async (roomId) => {
     );
 };
 
+const setActive = async (roomId) => {
+    await db.query(
+        `
+        UPDATE GAME_ROOM
+        SET IS_ACTIVE = 1
+        WHERE GID = ?
+        `, 
+        [roomId]
+    );
+};
+
+const getAllRooms = async () => {
+  const [rows] = await db.query(`
+    SELECT 
+      GID AS roomId,
+      MASTER_UID AS masterId,
+      TOTAL_PLAYER AS totalPlayer,
+      WAITING_PLAYER AS waitingPlayer,
+      IS_ACTIVE AS isActive
+    FROM GAME_ROOM
+  `);
+  return rows;
+};
+
 module.exports = {
     createRoom,
     getRoomInfo,
     addWaitingPlayer,
     subWaitingPlayer,
+    getAllRooms,
+    setActive,
 }

@@ -32,9 +32,19 @@ const subWaitingPlayer = async (roomId) => {
   await gameRoomModel.subWaitingPlayer(roomId);
 };
 
+const getAllRooms = async() => {
+  return await gameRoomModel.getAllRooms();
+};
+
+const setActive = async (roomId) => {
+  await gameRoomModel.setActive(roomId);
+};
+
 module.exports = {
     getRoomInfo,
     createGameRoom,
     addWaitingPlayer,
     subWaitingPlayer,
+    getAllRooms,
+    setActive,
 }
