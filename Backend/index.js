@@ -9,6 +9,11 @@ const jwt = require("jsonwebtoken");
 const authRoutes = require("./src/api/AuthRoute");
 const rankingRoutes = require("./src/api/RankingRoute");
 const gameRoomRoutes = require("./src/api/GameRoomRoute");
+const connectedUserRoute = require("./src/api/ConnectedUserRoute");
+
+// 접속자 목록 위한
+const { addConnectedUser, removeConnectedUser } = require("./src/services/connectedUserService");
+const userModel = require("./src/models/usersModel");  // DB 접근용
 
 const app = express();
 app.use(cors());  // cors 허용
@@ -21,6 +26,7 @@ app.use('/uploads',express.static(path.join(__dirname, './src/uploads')));
 app.use("/auth", authRoutes);
 app.use("/ranking", rankingRoutes);
 app.use("/gameroom", gameRoomRoutes);
+app.use("/connected_users", connectedUserRoute);
 
 const server = http.createServer(app);
 
@@ -59,12 +65,24 @@ app.get('/', (req, res) => {
   res.send('<h1>서버 생성 완료</h1>');
 });
 
-// 소켓 연결
-io.on("connection", (socket) => { // 클라이언트가 연결되었을 때
+// 소켓 연결 -> 로그인 완료시 연결됨.
+io.on("connection", async (socket) => { // 클라이언트가 연결되었을 때
   console.log(`🟢 연결됨: ${socket.id}`); // 연결된 클라이언트의 socket.id 출력
+  const userId = socket.user.id;
+
+  // DB에서 프로필 이미지까지 포함한 유저 정보 가져옴
+  const [rows] = await userModel.getUserById(userId);
+  const userInfo = {
+    socketId: socket.id,
+    userId: userId,
+    userName: socket.user.userName,
+    profileImg: rows[0].profileImg,
+  }
+  addConnectedUser(userId, userInfo);
 
   // 클라이언트와의 소켓 통신 이벤트 예시
   socket.on("disconnect", () => {
+    removeConnectedUser(userId);
     console.log(`🔴 연결 끊김: ${socket.id}`); // 클라이언트 연결이 끊겼을 때 출력
   });
 

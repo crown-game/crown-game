@@ -57,10 +57,19 @@ const getUserScore = async (roomId, userId) => {
     return rows[0]?.GAME_SCORE || 0;
 };
 
+const getUserById = async (userId) => {
+  return await db.query(`
+    SELECT UID AS userId, USERNAME AS userName, PROFILE_IMG AS profileImg
+    FROM USERS
+    WHERE UID = ?
+  `, [userId]);
+};
+
 module.exports = {
     getWinnersByRoomId,
     addCrownToWinners,
     getUserRanking,
     addScoreToUser,
     getUserScore,
+    getUserById,
 };
