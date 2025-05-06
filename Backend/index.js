@@ -66,18 +66,25 @@ app.get('/', (req, res) => {
 });
 
 // 소켓 연결 -> 로그인 완료시 연결됨.
-io.on("connection", async (socket) => { // 클라이언트가 연결되었을 때
-  console.log(`🟢 연결됨: ${socket.id}`); // 연결된 클라이언트의 socket.id 출력
-  const userId = socket.user.id;
-
-  // DB에서 프로필 이미지까지 포함한 유저 정보 가져옴
+io.on("connection", async (socket) => {
+  console.log(`🟢 연결됨: ${socket.id}`);
+  const userId = socket.user.userId;
+  
   const [rows] = await userModel.getUserById(userId);
+
+  if (!rows || rows.length === 0) {
+    console.error(`❌ 유저 ID ${userId}에 해당하는 정보가 DB에 없음`);
+    socket.disconnect(); // 연결 강제 종료
+    return;
+  }
+
   const userInfo = {
     socketId: socket.id,
     userId: userId,
     userName: socket.user.userName,
     profileImg: rows[0].profileImg,
-  }
+  };
+
   addConnectedUser(userId, userInfo);
 
   // 클라이언트와의 소켓 통신 이벤트 예시
@@ -93,7 +100,6 @@ io.on("connection", async (socket) => { // 클라이언트가 연결되었을 �
 
   socket.emit("news", "Hello Socket.io");
 });
-
 // 서버 실행
 server.listen(5001, () => {
   console.log("🚀 서버 실행 중: http://localhost:5001");
