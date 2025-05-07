@@ -74,7 +74,7 @@ const deleteRoom = async (roomId) => {
         `
         DELETE
         FROM GAME_ROOM
-        WHERE GID=1;
+        WHERE GID=?;
         `,
         [roomId]
     );
