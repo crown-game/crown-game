@@ -1,7 +1,7 @@
 const db = require("../config/db");
 
-
-const createRoom = async (masterId, totalPlayer) => {
+// 방 생성 및 게임방 id 리턴
+const createRoomAndGetGID = async (masterId, totalPlayer) => {
     const [result] = await db.query(
     "INSERT INTO GAME_ROOM (MASTER_UID, TOTAL_PLAYER, WAITING_PLAYER) VALUES (?, ?, 1)",
     [masterId, totalPlayer]
@@ -81,7 +81,7 @@ const deleteRoom = async (roomId) => {
 };
 
 module.exports = {
-    createRoom,
+    createRoomAndGetGID,
     getRoomInfo,
     addWaitingPlayer,
     subWaitingPlayer,

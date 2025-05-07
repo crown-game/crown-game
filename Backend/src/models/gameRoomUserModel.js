@@ -1,6 +1,6 @@
 const db = require("../config/db");
 
-// 추가
+// 해당 게임방에 유저 추가
 const joinRoom = async(roomId, userId) => {
     await db.query(
         `
