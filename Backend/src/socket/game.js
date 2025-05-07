@@ -1,10 +1,12 @@
-const gameStates = new Map();   // 방별 게임 상태 저장
-const questionTimer = new Map();  // 문제마다 제한 시간 재는 타이머
-const TIME_LIMIT = 5;  // 플젝에서 정한 시간은 20초
+const gameStates = new Map();       // 방별 게임 상태 저장
+const questionTimer = new Map();    // 문제마다 제한 시간 재는 타이머
+const TIME_LIMIT = 20;               // 플젝에서 정한 시간은 20초
 const quizService = require("../services/quizService");
 const gameScoreService = require("../services/gameScoreService");
+const usersModel = require("../models/usersModel");
 const gameRoomService = require("../services/gameRoomService");
 const gameRoomUserService = require("../services/gameRoomUserService");
+const ROUND_COUNTDOWN = 5;
 
 // game.js
 async function startGameRounds(io, roomId, round) {
@@ -12,17 +14,17 @@ async function startGameRounds(io, roomId, round) {
 
   const questions = await quizService.buildQuestions(round);
 
-    // ✅ 기존 상태 유지하며 round, questionIndex, questions만 갱신
-    const prevState = gameStates.get(roomId) || {};
-        gameStates.set(roomId, {
-        ...prevState,          // 기존 상태 유지
-        round,                 // 새로운 라운드 번호 덮어쓰기
-        questionIndex: 0,      // 문제 인덱스 초기화
-        questions,              // 새 문제 리스트
-        correctUsers: []      // 문제마다 맞은 사람들만 넣을 배열!
-    });
+  // 기존 상태 유지하며 round, questionIndex, questions만 갱신
+  const prevState = gameStates.get(roomId) || {};
+  gameStates.set(roomId, {
+    ...prevState,     // 기존 상태 유지
+    round,            // 새로운 라운드 번호 덮어쓰기
+    questionIndex: 0, // 문제 인덱스 초기화
+    questions,        // 새 문제 리스트
+    correctUsers: [], // 문제마다 맞은 사람들만 넣을 배열!
+  });
 
-    sendNextQuestion(io, roomId);
+  sendNextQuestion(io, roomId);
 }
 
 async function sendNextQuestion(io, roomId) {
@@ -42,13 +44,25 @@ async function sendNextQuestion(io, roomId) {
       // 우승자 왕관 하나 추가
       await gameScoreService.addCrownToWinners(winners);
 
+      // 여기서 우승자들의 userName 을 가져옴
+      const winnerNames = [];
+      for (const { UID } of winners) {
+        // 서비스에서 userId 로 조회하면 [rows] 형태로 반환
+        // usersModel 에 정의된 getUserById 로 조회
+        const [rows] = await usersModel.getUserById(UID);
+        if (rows.length > 0) {
+          winnerNames.push(rows[0].userName);
+        }
+      }
+
       io.to(roomId).emit("game_finished", {
-        message: "🎉 게임이 종료되었습니다!",
-        // scores: Object.fromEntries(userScores),  // userId별 점수 객체 전송
+        message: `🎉 ${winnerNames.join(
+          ", "
+        )}님 께서 우승하셨습니다! 👑왕관 흭득!👑`,
+        winners: winnerNames,
       });
 
       // 전체 랭킹 다시 불러와서 로비로 broadcast
-      // 이 부분 DB 연결 필요!
       const rankingRows = await gameScoreService.getRanking();
 
       io.emit("update_ranking", rankingRows);
@@ -64,7 +78,7 @@ async function sendNextQuestion(io, roomId) {
     }
 
     io.to(roomId).emit("round_started", { round: nextRound });
-    setTimeout(() => startGameRounds(io, roomId, nextRound), 2000); // NEXT ROUND 시작 전 2초 기다림
+    setTimeout(() => startGameRounds(io, roomId, nextRound), ROUND_COUNTDOWN * 1000); // 라운드 넘어갈 때마다 5초!
     return;
   }
 
@@ -75,8 +89,8 @@ async function sendNextQuestion(io, roomId) {
   state.answerIndex = answerIndex;
   state.questionId = question.id;
   state.questionIndex++;
-  state.correctUsers = []; // 새 문제이므로 초기화
-  gameStates.set(roomId, state);    // 상태 업데이트 명시적으로 저장
+  state.correctUsers = [];        // 새 문제이므로 초기화
+  gameStates.set(roomId, state);  // 상태 업데이트 명시적으로 저장
 
   io.to(roomId).emit("new_question", {
     round,
@@ -86,7 +100,9 @@ async function sendNextQuestion(io, roomId) {
     options: shuffled.map((opt) => opt.option_text),
   });
 
-  console.log(`🕹️ ${roomId} 문제 전송: 라운드 ${round}, 문제 ${state.questionIndex}`);
+  console.log(
+    `🕹️ ${roomId} 문제 전송: 라운드 ${round}, 문제 ${state.questionIndex}`
+  );
 
   // 이전 타이머 제거
   if (questionTimer.has(roomId)) {
@@ -96,48 +112,66 @@ async function sendNextQuestion(io, roomId) {
   // 다음 문제 타이머 설정
   const timerId = setTimeout(() => {
     sendNextQuestion(io, roomId);
-  }, TIME_LIMIT*1000);
+  }, TIME_LIMIT * 1000);
 
   questionTimer.set(roomId, timerId);
 }
 
 function registerGameHandlers(io, socket) {
   socket.on("submit_answer", async ({ roomId, answerIndex }) => {
-    const userId = socket.user.userId;
-    const state = gameStates.get(roomId);
-    if (!state) return;
+    try {
+      const userId = socket.user.userId;
+      const userName = socket.user.userName;
+      const state = gameStates.get(roomId);
+      if (!state) return;
 
-    const correct = answerIndex === state.answerIndex;
-    console.log(`📥 ${userId} → ${roomId} 정답 제출: ${correct ? "⭕ 정답" : "❌ 오답"}`);
+      const correct = answerIndex === state.answerIndex;
+      console.log(
+        `📥 ${userId} → ${roomId} 정답 제출: ${correct ? "⭕ 정답" : "❌ 오답"}`
+      );
 
-    if (correct) {
-      // 중복 방지
-      if (!state.correctUsers.includes(userId)) {
-        state.correctUsers.push(userId); //  정답자 배열에 순서대로 추가
+      //이거 추가!!!!!!!
+      io.to(roomId).emit("game_event", {
+        message: `📥 ${userName}님이 ${correct ? "⭕ 정답" : "❌ 오답"} 제출`,
+      });
 
-        // ✅ 점수 부여: 선착순 3등까지만
-      const index = state.correctUsers.length - 1;
-      if (index < 3) {
-        const round = state.round;
-        const pointTable = round === 5 ? [50, 30, 10] : [30, 20, 10];
-        const points = pointTable[index];
+      if (correct) {
+        // 중복 방지
+        if (!state.correctUsers.includes(userId)) {
+          state.correctUsers.push(userId);  // 정답자 배열에 순서대로 추가
 
-        await gameScoreService.addScoreToUser(roomId, userId, points);
-        const newScore = await gameScoreService.getUserScore(roomId, userId);
+          // 점수 부여: 선착순 3등까지만
+          const index = state.correctUsers.length - 1;
+          if (index < 3) {
+            const round = state.round;
+            const pointTable = round === 5 ? [50, 30, 10] : [30, 20, 10];
+            const points = pointTable[index];
 
-        // const prevScore = userScores.get(userId) || 0;
-        // const newScore = prevScore + points;
-        // userScores.set(userId, newScore);
+            await gameScoreService.addScoreToUser(roomId, userId, points);
+            const newScore = await gameScoreService.getUserScore(
+              roomId,
+              userId
+            );
 
-        console.log(`🏅 ${userId}님에게 ${points}점 지급! (총점: ${newScore})`);
+            console.log(
+              `🏅 ${userId}님에게 ${points}점 지급! (총점: ${newScore})`
+            );
 
-        // 클라이언트에게 실시간 점수 전송
-        io.to(roomId).emit("score_updated", {
-          userId,
-          score: newScore,
-        });
+            //이거 추가!!!!!!!
+            io.to(roomId).emit("game_event", {
+              message: `🏅 ${userName}님에게 ${points}점 지급! (총점: ${newScore})`,
+            });
+
+            // 클라이언트에게 실시간 점수 전송
+            io.to(roomId).emit("score_updated", {
+              userId,
+              score: newScore,
+            });
+          }
         }
       }
+    } catch (err) {
+      console.error("⚠️ submit_answer 처리 중 오류:", err);
     }
   });
 
