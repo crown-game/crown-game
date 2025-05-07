@@ -202,8 +202,9 @@ function registerGameHandlers(io, socket) {
     // ✅ 같은 방 내부 유저들에게 퇴장 알림
     io.to(roomId).emit("user_left", { userId });
 
-    // ✅ 1명 이하 남으면 게임 종료
-    if (waitingPlayers <= 1) {
+    // 게임이 시작한 상태에서 1명 이하 남으면 게임 종료
+    // 게임방 생성했을 때 다 나가면 방 없어짐
+    if ((waitingPlayers <= 1 && isActive===1) || waitingPlayers===0) {
       io.to(roomId).emit("game_forced_end", {
         message: "⚠️ 플레이어가 모두 나가 게임이 종료되었습니다.",
       });
