@@ -4,6 +4,10 @@ const joinRoom = async(roomId, userId) => {
     await gameRoomUserModel.joinRoom(roomId, userId);
 };
 
+const getPlayersInRoomByGID = async (roomId) => {
+    await gameRoomUserModel.getPlayersInRoomByGID(roomId);
+}
+
 const leaveRoom = async (roomId, userId) => {
     await gameRoomUserModel.leaveRoom(roomId, userId);
 };
@@ -11,4 +15,5 @@ const leaveRoom = async (roomId, userId) => {
 module.exports = {
     joinRoom,
     leaveRoom,
+    getPlayersInRoomByGID,
 };

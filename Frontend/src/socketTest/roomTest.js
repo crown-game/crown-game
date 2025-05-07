@@ -13,7 +13,7 @@ function RoomCreateTest() {
   useEffect(() => {
     socket.on("room_created", ({ roomId, masterId, totalPlayer }) => {
       log(`✅ room_created 수신: roomId=${roomId}, masterId=${masterId}, totalPlayer=${totalPlayer}`);
-      setRoomId(roomId);
+      //setRoomId(roomId);
     });
 
     // 방 생성 후 방 정보 변경

@@ -5,6 +5,7 @@ const http = require("http");
 const { Server } = require('socket.io');
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+
 // 라우터 등록
 const authRoutes = require("./src/api/AuthRoute");
 const rankingRoutes = require("./src/api/RankingRoute");
