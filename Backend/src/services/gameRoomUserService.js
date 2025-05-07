@@ -5,7 +5,7 @@ const joinRoom = async(roomId, userId) => {
 };
 
 const getPlayersInRoomByGID = async (roomId) => {
-    await gameRoomUserModel.getPlayersInRoomByGID(roomId);
+    return await gameRoomUserModel.getPlayersInRoomByGID(roomId);
 }
 
 const leaveRoom = async (roomId, userId) => {
