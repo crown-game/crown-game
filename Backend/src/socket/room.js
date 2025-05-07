@@ -78,7 +78,6 @@ module.exports = (io, socket) => {
                 // ✅ 5초 후 첫 문제 출제
                 setTimeout(() => {
                     console.log(`⏳ 5초 후 startGameRounds 실행!`);
-                    // io.to(roomId).emit("start_game_rounds", { roomId }); // emit으로 game.js에 시작 신호 보냄
                     startGameRounds(io, roomId, FIRST_ROUND);  // 직접 함수 실행! 1라운드부터 실행.
                 }, COUNTDOWN_SECONDS * 1000);
             }
