@@ -2,7 +2,12 @@ const {startGameRounds} = require("./game");
 const gameRoomService = require("../services/gameRoomService");
 const gameRoomUserService = require("../services/gameRoomUserService");
 
+const COUNTDOWN_SECONDS = 5;    // 첫 시작 카운트 및 라운드 카운트다운
+const FIRST_ROUND = 1;
+
 module.exports = (io, socket) => {
+    // 사용자가 방을 만들었을 때
+    // 방을 만들 때 totalPlayer를 받아와서 참여 인원을 제한 함.
     socket.on("create_room", async ({ totalPlayer }) => {
         const masterId = socket.user.userId;
         try{
@@ -22,7 +27,7 @@ module.exports = (io, socket) => {
         }
     });
 
-    // ✅ 플레이어가 게임방에 입장 (
+    // 플레이어가 게임방에 입장 (
     socket.on("join_room", async ({ roomId }) => {
         const userId = socket.user.userId;
         try{
@@ -36,12 +41,11 @@ module.exports = (io, socket) => {
 
             socket.join(roomId); // 룸 참가
 
-            // 최신 방 정보 조회
+            // 방 정보 조회
             let roomInfo = await gameRoomService.getRoomInfo(roomId);
 
             const isActive = roomInfo.waitingPlayer === roomInfo.totalPlayer;   // 참가 인원 다 찼으면 게임 시작
 
-            // 입장 알림 기능 괜찮은데?
             // 본인에게 입장 완료 알림
             socket.emit("joined_room", { roomId, userId });
 
@@ -50,10 +54,10 @@ module.exports = (io, socket) => {
 
             // 게임방 내부 참가자에게 게임 시작 알림!
             if(isActive){
-                // Active 정보 저장
+                // 게임 시작 시 isActive를 true로!
                 await gameRoomService.setActive(roomId);
 
-                // 최신 방 정보 조회
+                // 방 정보 조회
                 roomInfo = await gameRoomService.getRoomInfo(roomId);
 
                 // 해당 네임스페이스에 실시간 전송
@@ -69,14 +73,14 @@ module.exports = (io, socket) => {
                 console.log(`🎮${roomId}번 게임방 게임 시작!!`);
 
                 // ✅ 곧 1라운드 첫 문제가 시작된다는 타이머 알림 보내기!
-                io.to(roomId).emit("countdown", { seconds: 5 }); // 클라이언트가 5초 카운트다운 시작
+                io.to(roomId).emit("countdown", { seconds: COUNTDOWN_SECONDS }); // 클라이언트가 5초 카운트다운 시작
 
                 // ✅ 5초 후 첫 문제 출제
                 setTimeout(() => {
                     console.log(`⏳ 5초 후 startGameRounds 실행!`);
                     // io.to(roomId).emit("start_game_rounds", { roomId }); // emit으로 game.js에 시작 신호 보냄
-                    startGameRounds(io, roomId, 1);  // 직접 함수 실행! 1라운드부터 실행.
-                }, 5000);
+                    startGameRounds(io, roomId, FIRST_ROUND);  // 직접 함수 실행! 1라운드부터 실행.
+                }, COUNTDOWN_SECONDS * 1000);
             }
 
         } catch(err){

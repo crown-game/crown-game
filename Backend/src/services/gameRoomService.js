@@ -7,7 +7,7 @@ const getRoomInfo = async (roomId) => {
 
 const createGameRoom = async (masterId, totalPlayer) => {
   // 1. 방 생성 후 roomId 얻기
-  const roomId = await gameRoomModel.createRoom(masterId, totalPlayer);
+  const roomId = await gameRoomModel.createRoomAndGetGID(masterId, totalPlayer);
   
   // 2. 방장 DB 등록 (인자로 받은 masterId 사용해야 함)
   await gameRoomUserModel.joinRoom(roomId, masterId);
