@@ -1,7 +1,6 @@
 {
   "name": "frontend",
   "version": "1.0.0",
-  "description": "",
   "main": "App.js",
   "scripts": {
     "start": "react-scripts start",
@@ -13,6 +12,7 @@
   "license": "ISC",
   "dependencies": {
     "react-dom": "^19.1.0",
+    "react-router-dom": "^7.5.3",
     "react-scripts": "^5.0.1",
     "socket.io-client": "^4.8.1"
   },
@@ -27,5 +27,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "description": ""
 }
