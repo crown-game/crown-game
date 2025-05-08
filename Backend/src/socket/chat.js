@@ -10,7 +10,9 @@ module.exports = (io, socket) => {
 
       if (containsForbidden) {
         console.log(`🚫 [${userId}] 금칙어 메시지 차단됨: ${message}`);
-        socket.emit("chat_blocked", { message: "⚠️ 금지어가 포함된 메시지는 전송할 수 없습니다." });
+        //점수 차감 로직 추가
+        await chatService.penalizeUser(userId);
+        socket.emit("chat_blocked", { message: "⚠️ 금지어가 포함된 메시지는 전송할 수 없습니다. (점수 -10점)" });
         return;
       }
 
@@ -22,3 +24,4 @@ module.exports = (io, socket) => {
     }
   });
 };
+

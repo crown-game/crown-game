@@ -3,8 +3,8 @@ const mysql = require('mysql2');  // mysql 플로그인 호출
 
 const pool = mysql.createPool({
   host: 'localhost',
-  user: 'rin',
-  password: '1234', // 실제 비밀번호로 변경
+  user: 'hippo',
+  password: 'hippo7621^^', // 실제 비밀번호로 변경
   database: 'crown_hunt'
 });
 

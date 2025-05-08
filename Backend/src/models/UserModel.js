@@ -8,6 +8,6 @@ class Users {
       this.crownCnt = crownCnt;
     }
   }
-  
+
   module.exports = Users;
   
