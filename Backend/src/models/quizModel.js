@@ -3,11 +3,14 @@ const db = require("../config/db");
 const getQuestionsByRound = async (round) => {
   const [rows] = await db.query(`
     SELECT * 
-    FROM QUIZ
+    FROM (
+        SELECT * 
+        FROM QUIZ
+        WHERE ROUND = ?
+        ORDER BY RAND()
+        LIMIT 25
+    ) AS random_quiz
     JOIN QUIZ_OPTION USING (QID)
-    WHERE ROUND = ?
-    ORDER BY QID
-    LIMIT 25
   `, [round]);
   return rows;
 };
