@@ -1,4 +1,5 @@
 const chatService = require("../services/chatService");
+const gameScoreService = require("../services/gameScoreService");
 
 module.exports = (io, socket) => {
   socket.on("chat_message", async ({ roomId, message }) => {
@@ -19,6 +20,7 @@ module.exports = (io, socket) => {
                       userId
                     );
         
+        console.log(`🔥 점수 전송: userId=${userId}, score=${newScore}, roomId=${roomId}`);
         // 클라이언트에게 실시간 점수 전송
         io.to(roomId).emit("score_updated", {
           userId,
