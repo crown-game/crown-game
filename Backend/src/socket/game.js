@@ -1,6 +1,6 @@
 const gameStates = new Map();       // 방별 게임 상태 저장
 const questionTimer = new Map();    // 문제마다 제한 시간 재는 타이머
-const TIME_LIMIT = 20;               // 플젝에서 정한 시간은 20초
+const TIME_LIMIT = 5;               // 플젝에서 정한 시간은 20초
 const quizService = require("../services/quizService");
 const gameScoreService = require("../services/gameScoreService");
 const usersModel = require("../models/usersModel");
