@@ -6,8 +6,8 @@ const getForbiddenWords = async () => {
 };
 
 //금지어 채팅 시 점수 차감 로직 구현
-const deducScore = async(userId, game_score = 10) => {
-  await db.query("update user set score = score - ? where userId = ?",[game_score , userId]);
+const deducScore = async(userId) => {
+  await db.query("update game_room_user set game_score = game_score - 10 where uId = ?",[userId]);
 };
 
 module.exports = {
