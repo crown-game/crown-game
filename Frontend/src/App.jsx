@@ -1,24 +1,22 @@
-import React, { useState} from "react";
-
-import RoomTest from "./socketTest/roomTest";
-import RoomJoinTest from "./socketTest/roomJoinTest";
-import GameQuizTest from "./socketTest/gameQuizTest";
-import Chat from "./socketTest/chat";
+import { Routes, Route } from "react-router-dom";
+import Background from "./components/Background";
+import Home from "./pages/Home";
+import Lobby from "./pages/Lobby";
+import "./App.css";
+import ChatRoom from "./pages/ChatRoom";
 
 function App() {
-  const [roomInfo, setRoomInfo] = useState({ roomId: null });
-
   return (
-    <div className="App">
-      <RoomTest/>
-      <RoomJoinTest setRoomInfo={setRoomInfo} />
-      {roomInfo.roomId && (
-        <>
-          <GameQuizTest roomId={roomInfo.roomId} />
-          <Chat roomId={roomInfo.roomId} />
-        </>
-      )}
-    </div>
+    <>
+      <Background />
+      <div className="app">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/lobby" element={<Lobby />} />
+          <Route path="/chat-room/:id" element={<ChatRoom />} />
+        </Routes>
+      </div>
+    </>
   );
 }
 
